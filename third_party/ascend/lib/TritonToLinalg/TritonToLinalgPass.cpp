@@ -57,6 +57,7 @@
 
 #include "bishengir/Dialect/Annotation/IR/Annotation.h"
 #include "bishengir/Dialect/HIVM/IR/HIVM.h"
+#include "bishengir/Dialect/Scope/IR/Scope.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Bufferization/IR/Bufferization.h"
@@ -163,6 +164,11 @@ static bool isSIMTOp(Operation *op) {
   if (auto custom_op = dyn_cast<hivm::CustomOp>(op)) {
     return custom_op.getCoreType() == hivm::TCoreType::VECTOR &&
            custom_op.getVFMode() == hivm::VFMode::SIMT;
+  }
+
+  if (auto scopeOp = dyn_cast<scope::ScopeOp>(op)) {
+    auto vecTypeAttr = scopeOp->getAttrOfType<StringAttr>("vector_type");
+    return vecTypeAttr && vecTypeAttr.getValue() == "simt";
   }
 
   if (isa<triton::GatherOp>(op) && compileOn91095Flag) {
